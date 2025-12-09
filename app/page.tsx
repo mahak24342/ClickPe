@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { Chat } from "./components/Chat";
 
 // Product Type
 type Product = {
@@ -121,12 +122,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* CTA */}
-                <Button
-                  className="w-full mt-3"
-                  onClick={() => setSelectedProduct(product)}
-                >
-                  Ask About Product
-                </Button>
+                <Chat product={product}/>
               </CardContent>
             </Card>
           );

@@ -1,68 +1,60 @@
-// app/api/ai/ask/route.ts
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { supabase } from "@/lib/supabaseClient"; // Use server client here
 import OpenAI from "openai";
-
-// 1️⃣ Zod schema for request validation
-const requestSchema = z.object({
-  productId: z.string(),
-  message: z.string(),
-  history: z.array(
-    z.object({
-      role: z.enum(["user", "assistant"]),
-      content: z.string(),
-    })
-  ),
-});
-
-// 2️⃣ Initialize OpenAI client (server-side)
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const { message, product, history = [] } = body;
 
-    // 3️⃣ Validate request body
-    const { productId, message, history } = requestSchema.parse(body);
+    // Format previous messages for OpenAI
+    const historyFormatted = history.map((msg: any) => ({
+      role: msg.role,
+      content: msg.content,
+    }));
 
-    // 4️⃣ Fetch product from Supabase
-    const { data: product, error } = await supabase
-      .from("products")
-      .select("*")
-      .eq("id", productId)
-      .single();
-
-    if (error || !product) {
-      return NextResponse.json(
-        { answer: "Product not found." },
-        { status: 404 }
-      );
-    }
-
-    // 5️⃣ Construct AI prompt
-    const prompt = `
-You are a helpful assistant for a loan product.
-Product info: ${JSON.stringify(product, null, 2)}
-Answer the user's question strictly based on this product info. 
-If the question is unrelated, politely say you can't answer.
-User question: "${message}"
-`;
-
-    // 6️⃣ Call OpenAI API
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // or "gpt-3.5-turbo"
-      messages: [{ role: "user", content: prompt }],
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY!,
     });
 
-    // 7️⃣ Extract answer
-    const answer = completion.choices[0]?.message?.content ?? "I cannot answer that.";
+    // System prompt with dynamic product data
+    const aiMessages = [
+      {
+        role: "system",
+        content: `
+You are a helpful financial assistant.
 
-    return NextResponse.json({ answer });
+Answer ONLY using the following product data:
+
+Product Name: ${product.name}
+APR: ${product.rate_apr}%
+Minimum Income: ₹${product.min_income}
+Minimum Credit Score: ${product.min_credit_score}
+Description: ${product.description || "No description available."}
+
+If the user asks something unrelated to this product, reply:
+"I can only answer questions related to this loan product."
+`,
+      },
+      ...historyFormatted,
+      {
+        role: "user",
+        content: message,
+      },
+    ];
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: aiMessages,
+    });
+
+    const answer =
+      completion.choices[0].message?.content ||
+      "I couldn't find an answer.";
+
+    return Response.json({ answer });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json(
-      { answer: "Something went wrong." },
+    console.error("AI error:", err);
+    return Response.json(
+      { error: "Something went wrong with the AI." },
       { status: 500 }
     );
   }

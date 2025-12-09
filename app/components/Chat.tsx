@@ -47,14 +47,15 @@ export function Chat({ product }: ProductChatProps) {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/ai/ask", {
+      const res = await fetch("http://localhost:3000/api/ai/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: product.id,
-          message: userMsg.content,
-          history: [...messages, userMsg],
-        }),
+       body: JSON.stringify({
+  productId: product.id,
+  product,  // 🔥 SEND FULL PRODUCT OBJECT
+  message: userMsg.content,
+  history: [...messages, userMsg]
+})
       });
 
       const data = await res.json();
