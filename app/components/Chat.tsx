@@ -47,7 +47,7 @@ export function Chat({ product }: ProductChatProps) {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/ai/ask", {
+      const res = await fetch("/api/ai/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
        body: JSON.stringify({

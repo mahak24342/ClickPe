@@ -69,7 +69,7 @@ export default function Dashboard() {
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
       {/* Page Title */}
       <div className="text-center">
-        <h1 className="text-3xl md:text-4xl font-bold">Your Top Loan Matches</h1>
+        <h1 className="text-3xl md:text-4xl font-bold">YOUR TOP LOAN MATCHES</h1>
         <p className="text-muted-foreground mt-2">
           These loan products match your profile the best.
         </p>

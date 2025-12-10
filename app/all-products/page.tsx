@@ -31,7 +31,7 @@ export default function AllProductsPage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold text-center">All Loan Products</h1>
+      <h1 className="text-3xl font-bold text-center">ALL LOAN PRODUCTS</h1>
 
       {/* Search and Filters */}
       <div className="flex flex-col md:flex-row gap-6 items-center justify-center">
@@ -54,7 +54,7 @@ export default function AllProductsPage() {
             step={0.1}
             value={apr}
             onChange={(e) => setApr(+e.target.value)}
-            className="w-48"
+            className="w-48 "
           />
         </div>
 
